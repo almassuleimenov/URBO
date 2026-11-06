@@ -65,8 +65,13 @@ function Wheel({
   sw: number;
   scale?: number;
 }) {
+  // Ось колеса — центр втулки. Ниппель торчит над ободом на 0.55·sw и растягивает рамку группы вверх,
+  // поэтому «центр рамки» (50% 50%) лежал бы выше оси и колесо восьмерило бы. Считаем точную долю.
+  // Motion сам выставляет transform-origin у SVG, поэтому ось задаём только через originX/originY.
+  const nipple = sw * 0.55;
+  const originY = (WHEEL_R + nipple) / (2 * WHEEL_R + nipple);
   return (
-    <motion.g style={{ rotate, transformBox: "fill-box", transformOrigin: "center" }}>
+    <motion.g style={{ rotate, transformBox: "fill-box", originX: 0.5, originY }}>
       <motion.circle
         cx={cx}
         cy={cy}
@@ -138,7 +143,10 @@ export function Bike({
       />
       {crank && (
         <motion.g
-          style={{ rotate: crank, transformBox: "view-box", transformOrigin: `${BB.x}px ${BB.y}px` }}
+          // Ось шатуна — каретка (BB). Левый край рамки группы и есть BB: шатун идёт от неё вправо,
+          // а педаль вращается симметрично вокруг своего центра и рамку влево/по вертикали не сдвигает.
+          // transformOrigin в px Motion перезаписывает на 50% 50% — отсюда был «орбитальный» шатун.
+          style={{ rotate: crank, transformBox: "fill-box", originX: 0, originY: 0.5 }}
         >
           <motion.path
             d={FOOT}
