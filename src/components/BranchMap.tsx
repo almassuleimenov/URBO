@@ -14,7 +14,7 @@ import {
 } from "@/data/branches";
 import { BIKE_SVG_STRING } from "./Bike";
 import { typo } from "@/lib/typo";
-import { EASE_EXPO, EASE_OUT, useReducedMotion } from "@/lib/motion";
+import { EASE_EXPO, EASE_OUT, useMediaQuery, useReducedMotion } from "@/lib/motion";
 
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 const ALMATY: [number, number] = [76.89, 43.24];
@@ -92,6 +92,22 @@ function StatusDot({ open }: { open: boolean }) {
   );
 }
 
+const idle = () =>
+  new Promise<void>((resolve) => {
+    if ("requestIdleCallback" in window) window.requestIdleCallback(() => resolve(), { timeout: 1500 });
+    else setTimeout(resolve, 200);
+  });
+
+/** Подсказка зависит от устройства: на телефоне навести курсор нельзя */
+function MapHint() {
+  const mouse = useMediaQuery("(hover: hover) and (pointer: fine)", true);
+  return typo(
+    mouse
+      ? "Наведите на точку, чтобы увидеть адрес и часы. Нажмите, и карта подлетит к кофейне."
+      : "Нажмите на точку, и карта подлетит к кофейне: адрес, часы и маршрут.",
+  );
+}
+
 export function BranchMap() {
   const reduce = useReducedMotion();
   const now = useNow();
@@ -151,7 +167,13 @@ export function BranchMap() {
       try {
         await nearView;
         if (cancelled) return;
+        // Разбор и запуск MapLibre — долгая задача; на телефоне она подвешивала прокрутку.
+        // Ждём паузы, когда браузер свободен (обычно между жестами), но не дольше 1,5 с.
+        await idle();
+        if (cancelled) return;
         const ml = await import("maplibre-gl");
+        if (cancelled || !container.current) return;
+        await idle();
         if (cancelled || !container.current) return;
         ml.setWorkerUrl("/vendor/maplibre-gl-worker.mjs");
         map = new ml.Map({
@@ -380,7 +402,7 @@ export function BranchMap() {
             </h2>
           </div>
           <p className="max-w-[38ch] text-muted">
-            {typo("Наведите на точку, чтобы увидеть адрес и часы. Нажмите, и карта подлетит к кофейне.")}
+            <MapHint />
           </p>
         </div>
 

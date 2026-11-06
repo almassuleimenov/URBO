@@ -14,7 +14,7 @@ import {
 import { Bike } from "./Bike";
 import { RidingBike } from "./RidingBike";
 import { typo } from "@/lib/typo";
-import { EASE_EXPO, EASE_OUT, useIntroDone, useReducedMotion } from "@/lib/motion";
+import { EASE_EXPO, EASE_OUT, useIntroDone, useLite, useReducedMotion } from "@/lib/motion";
 
 const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -61,6 +61,7 @@ function Badge({ ready }: { ready: boolean }) {
 export function Hero() {
   const ready = useIntroDone();
   const reduce = useReducedMotion();
+  const lite = useLite();
   const ref = useRef<HTMLElement>(null);
   const laneRef = useRef<HTMLDivElement>(null);
   const bikeRef = useRef<HTMLDivElement>(null);
@@ -116,7 +117,7 @@ export function Hero() {
       className="relative flex min-h-[100dvh] flex-col overflow-hidden bg-urbo pt-[clamp(96px,13vh,120px)] text-cream"
     >
       <div className="wrap grid flex-1 items-center gap-10 md:grid-cols-12">
-        <motion.div className="md:col-span-7" style={{ y: reduce ? 0 : textY }}>
+        <motion.div className="md:col-span-7" style={{ y: reduce || lite ? 0 : textY }}>
           <h1 className="text-[clamp(2.9rem,6.6vw,6rem)] leading-[0.94] font-bold tracking-[-0.03em]">
             {H1_LINES.map((line, i) => (
               <span key={line} className="line-mask">

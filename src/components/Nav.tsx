@@ -85,7 +85,7 @@ export function Nav() {
             aria-label="Основная навигация"
             className={`flex h-14 items-center justify-between rounded-full pr-2 pl-5 transition-[background-color,color,box-shadow] duration-300 ${
               solid
-                ? "bg-cream/90 text-urbo shadow-[0_10px_30px_-18px_rgb(42_13_18/0.5)] backdrop-blur-md"
+                ? "bg-cream text-urbo shadow-[0_10px_30px_-18px_rgb(42_13_18/0.5)] md:bg-cream/90 md:backdrop-blur-md"
                 : "bg-transparent text-cream"
             }`}
           >

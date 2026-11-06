@@ -6,6 +6,7 @@ import { Fragment, useRef } from "react";
 import {
   motion,
   useAnimationFrame,
+  useInView,
   useMotionValue,
   useScroll,
   useSpring,
@@ -32,11 +33,13 @@ export function Marquee() {
   const velocity = useSpring(useVelocity(scrollY), { damping: 50, stiffness: 400 });
   const factor = useTransform(velocity, [-1500, 0, 1500], [-5, 0, 5], { clamp: false });
   const dir = useRef(1);
+  const sectionRef = useRef<HTMLElement>(null);
+  const visible = useInView(sectionRef, { margin: "100px 0px" });
   const hoverMul = useSpring(1, { stiffness: 120, damping: 20 });
   const x = useTransform(base, (v) => `${wrap(-50, -25, v)}%`);
 
   useAnimationFrame((_, delta) => {
-    if (reduce) return;
+    if (reduce || !visible) return;
     const f = factor.get();
     if (f < 0) dir.current = -1;
     else if (f > 0) dir.current = 1;
@@ -57,7 +60,7 @@ export function Marquee() {
   );
 
   return (
-    <section aria-label="Кофе, завтраки, боулы" className="overflow-hidden bg-peach py-[clamp(18px,3vw,34px)] text-urbo">
+    <section ref={sectionRef} aria-label="Кофе, завтраки, боулы" className="overflow-hidden bg-peach py-[clamp(18px,3vw,34px)] text-urbo">
       <p className="sr-only">Кофе, завтраки и боулы. 50+ кофеен URBO.</p>
       <motion.div
         aria-hidden

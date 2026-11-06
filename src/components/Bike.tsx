@@ -11,6 +11,7 @@ import { EASE_OUT } from "@/lib/motion";
 
 export const BIKE_VIEWBOX = "12 14 418 236";
 export const BIKE_VB_WIDTH = 418;
+export const BIKE_VB_HEIGHT = 236;
 export const WHEEL_R = 74;
 
 const REAR = { x: 95, y: 166 };

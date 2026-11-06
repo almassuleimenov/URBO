@@ -18,17 +18,19 @@ function StepCard({
   step,
   progress,
   index,
+  parallax,
 }: {
   step: (typeof steps)[number];
   progress: MotionValue<number>;
   index: number;
+  parallax: boolean;
 }) {
   // Фото внутри рамки едет чуть медленнее карточки — глубина без лишнего движения
   const imgX = useTransform(progress, [0, 1], [`${-4 + index * 1.5}%`, `${4 - index * 1.5}%`]);
   return (
     <article className="w-[min(80vw,400px)] shrink-0 snap-start md:w-[clamp(280px,min(26vw,50dvh),420px)]">
       <div className="zoom-frame relative aspect-[4/3] overflow-hidden bg-urbo-deep">
-        <motion.div className="absolute inset-y-0 -inset-x-[8%]" style={{ x: imgX }}>
+        <motion.div className="absolute inset-y-0 -inset-x-[8%]" style={{ x: parallax ? imgX : 0 }}>
           <Image
             src={step.photo.src}
             alt={step.alt}
@@ -114,7 +116,7 @@ export function Process() {
           }`}
         >
           {steps.map((s, i) => (
-            <StepCard key={s.n} step={s} index={i} progress={pageProgress} />
+            <StepCard key={s.n} step={s} index={i} progress={pageProgress} parallax={pinned} />
           ))}
         </motion.div>
 

@@ -29,6 +29,13 @@
     hanging-punctuation: first;
   }
 
+  /* На тач-устройствах Lenis выключен: якорные ссылки прокручивают плавно сами */
+  @media (pointer: coarse) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   a {
     text-underline-offset: 0.2em;
     text-decoration-thickness: 1px;

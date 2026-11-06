@@ -12,8 +12,15 @@ export function ActionBar() {
   const reduce = useReducedMotion();
   const [pastHero, setPastHero] = useState(false);
   const [blocked, setBlocked] = useState(false);
+  const [up, setUp] = useState(false);
 
-  useMotionValueEvent(scrollY, "change", (y) => setPastHero(y > window.innerHeight * 0.85));
+  // Панель видна, только когда листают вверх: при чтении сверху вниз она не закрывает текст и кнопки
+  useMotionValueEvent(scrollY, "change", (y) => {
+    setPastHero(y > window.innerHeight * 0.85);
+    const prev = scrollY.getPrevious() ?? y;
+    if (y > prev + 4) setUp(false);
+    else if (y < prev - 4) setUp(true);
+  });
 
   useEffect(() => {
     const seen = new Set<Element>();
@@ -39,7 +46,7 @@ export function ActionBar() {
     else el.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
   };
 
-  const show = pastHero && !blocked;
+  const show = pastHero && !blocked && up;
 
   return (
     <AnimatePresence>

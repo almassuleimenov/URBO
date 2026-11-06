@@ -55,3 +55,7 @@ export const rollAngle = (distance: number, radiusPx: number) =>
 
 /** Безопасная для гидратации версия: на сервере и при гидратации — false */
 export const useReducedMotion = () => useMediaQuery("(prefers-reduced-motion: reduce)", false);
+
+/** Телефон или планшет: отключаем декоративные эффекты, завязанные на прокрутку (параллакс и т.п.) */
+export const LITE_QUERY = "(max-width: 767px), (pointer: coarse)";
+export const useLite = () => useMediaQuery(LITE_QUERY, false);

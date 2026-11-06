@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useScroll, useSpring, useTransform } from "motion/react";
 import { RidingBike } from "./RidingBike";
+import { BIKE_VB_HEIGHT, BIKE_VB_WIDTH } from "./Bike";
+
+// Зазор между ободом колеса и нижним краем viewBox, в долях ширины велосипеда
+const WHEEL_GAP = 3 / BIKE_VB_WIDTH;
 import { INSTAGRAM } from "@/data/content";
 import { EASE_EXPO, useReducedMotion } from "@/lib/motion";
 
@@ -22,12 +26,32 @@ export function Footer() {
   const wordRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const inView = useInView(wordRef, { once: true, margin: "0px 0px -10% 0px" });
+  const lettersRef = useRef<HTMLSpanElement>(null);
   const [w, setW] = useState(1200);
+  // Расстояние от верха блока до верхней кромки букв: велосипед должен стоять ровно на ней
+  const [capTop, setCapTop] = useState<number | null>(null);
   const bikeW = Math.round(Math.max(60, Math.min(120, w * 0.09)));
+  const bikeH = (bikeW * BIKE_VB_HEIGHT) / BIKE_VB_WIDTH;
 
   useEffect(() => {
-    const m = () => wordRef.current && setW(wordRef.current.clientWidth);
+    const ctx = document.createElement("canvas").getContext("2d");
+    const m = () => {
+      const box = wordRef.current;
+      const glyph = lettersRef.current;
+      if (!box) return;
+      setW(box.clientWidth);
+      if (!glyph || !ctx) return;
+      const cs = getComputedStyle(glyph);
+      ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+      const t = ctx.measureText("URBO");
+      const content = t.fontBoundingBoxAscent + t.fontBoundingBoxDescent;
+      const halfLeading = (parseFloat(cs.lineHeight) - content) / 2;
+      const offset = glyph.getBoundingClientRect().top - box.getBoundingClientRect().top;
+      // +0.025em: поправка на сглаживание кромки — без неё колёса висят над буквами на пару пикселей
+      setCapTop(offset + halfLeading + t.fontBoundingBoxAscent - t.actualBoundingBoxAscent + parseFloat(cs.fontSize) * 0.025);
+    };
     m();
+    document.fonts?.ready.then(m);
     window.addEventListener("resize", m);
     return () => window.removeEventListener("resize", m);
   }, []);
@@ -77,7 +101,7 @@ export function Footer() {
           <div className="col-span-2">
             <p className="text-[0.95rem] font-semibold text-peach">Часы работы</p>
             <p className="mt-4 max-w-[36ch] text-cream/85">
-              Большинство кофеен работают с&nbsp;7:30–8:00 до&nbsp;22:00–23:00. Часы каждой точки есть на&nbsp;карте.
+              Большинство кофеен работают <span className="whitespace-nowrap">с&nbsp;7:30–8:00</span> <span className="whitespace-nowrap">до&nbsp;22:00–23:00</span>. Часы каждой точки есть на&nbsp;карте.
             </p>
           </div>
         </div>
@@ -86,13 +110,13 @@ export function Footer() {
         <div ref={wordRef} className="relative mt-[clamp(56px,9vh,110px)]" aria-hidden>
           <motion.div
             className="absolute left-0 text-peach"
-            style={{ x: reduce ? 0 : x, width: bikeW, top: -(bikeW * 0.565 - 4) }}
+            style={{ x: reduce ? 0 : x, width: bikeW, top: (capTop ?? 0) - bikeH + bikeW * WHEEL_GAP }}
           >
             <RidingBike distance={x} width={bikeW} interactive strokeWidth={13} />
           </motion.div>
           <div className="flex justify-between font-display text-[clamp(6rem,30.5vw,27rem)] leading-[0.76] font-extrabold tracking-[-0.03em]">
             {"URBO".split("").map((ch, i) => (
-              <span key={i} className="line-mask">
+              <span key={i} ref={i === 0 ? lettersRef : undefined} className="line-mask">
                 <motion.span
                   className="block"
                   initial={{ y: "100%" }}

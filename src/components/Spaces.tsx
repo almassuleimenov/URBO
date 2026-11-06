@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { INSTAGRAM_DM } from "@/data/content";
 import { typo } from "@/lib/typo";
-import { EASE_EXPO, EASE_OUT, useReducedMotion } from "@/lib/motion";
+import { EASE_EXPO, EASE_OUT, useLite, useReducedMotion } from "@/lib/motion";
 
 const uses = [
   { t: "Встречи", d: "Закрытая дверь, общий стол и кофе на всех." },
@@ -32,6 +32,7 @@ function Photo({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
+  const lite = useLite();
   const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
@@ -44,7 +45,7 @@ function Photo({
       animate={inView || reduce ? { clipPath: "inset(0% 0% 0% 0%)" } : undefined}
       transition={{ duration: reduce ? 0 : 1.2, delay: reduce ? 0 : delay, ease: EASE_EXPO }}
     >
-      <motion.div className="absolute inset-x-0 -inset-y-[8%]" style={{ y: reduce ? 0 : y }}>
+      <motion.div className="absolute inset-x-0 -inset-y-[8%]" style={{ y: reduce || lite ? 0 : y }}>
         <Image src={src} alt={alt} width={w} height={h} sizes="(max-width: 767px) 100vw, 40vw" className="size-full object-cover" style={{ objectPosition: pos }} />
       </motion.div>
     </motion.div>
